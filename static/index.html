@@ -807,6 +807,19 @@ function handleFile(f){
 }
 
 /* ── Analysis ── */
+async function readApiResponse(res){
+  const body=await res.text();
+  let payload=null;
+  try{payload=body?JSON.parse(body):null;}catch(_){
+    payload={detail:body.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim()};
+  }
+  if(!res.ok){
+    throw new Error((payload&&payload.detail)||`Request failed (${res.status} ${res.statusText})`);
+  }
+  if(!payload){throw new Error(`Server returned an empty response (${res.status})`);}
+  return payload;
+}
+
 async function runAnalysis(){
   if(!uploadedFile) return;
   const btn=document.getElementById('analyzeBtn');
@@ -824,8 +837,7 @@ async function runAnalysis(){
     const fd=new FormData();
     fd.append('file',uploadedFile);
     const res=await fetch('/analyze',{method:'POST',body:fd});
-    if(!res.ok){const e=await res.json();throw new Error(e.detail||'Analysis failed');}
-    const data=await res.json();
+    const data=await readApiResponse(res);
     clearTimeout(timer);
     markAllDone(stageIds);
     await sleep(400);
