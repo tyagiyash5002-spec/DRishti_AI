@@ -242,23 +242,6 @@ def detect_lesions(img_bgr: np.ndarray) -> dict:
 
     counts = {k: max(0, _count(v)) for k, v in masks.items()}
 
-def _build_single_overlay(img_bgr: np.ndarray, mask: np.ndarray, color: tuple, label: str) -> np.ndarray:
-    overlay = img_bgr.copy()
-    if mask is not None and mask.size > 0:
-        m_rs = cv2.resize(mask, (img_bgr.shape[1], img_bgr.shape[0]))
-        hit = m_rs > 127
-        overlay[hit] = (overlay[hit] * 0.25 + np.array(color) * 0.75).astype(np.uint8)
-        
-        # Crisp outlines & target markers
-        contours, _ = cv2.findContours(m_rs, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        for cnt in contours:
-            if cv2.contourArea(cnt) > 2:
-                cv2.drawContours(overlay, [cnt], -1, color, 2, cv2.LINE_AA)
-                (x, y), r = cv2.minEnclosingCircle(cnt)
-                cv2.circle(overlay, (int(x), int(y)), int(max(r + 3, 5)), color, 1, cv2.LINE_AA)
-    return overlay
-
-
     quad_he = _count_quadrant_hemorrhages(he_mask)
     coordinates = _extract_coordinates(masks)
 
