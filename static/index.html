@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRishti AI — Diabetic Retinopathy Screening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Base ── */
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#060912;
+  --surface:rgba(16,22,40,.85);
+  --surface2:rgba(22,30,54,.9);
+  --border:rgba(99,130,255,.13);
+  --border-glow:rgba(99,130,255,.35);
+  --accent:#4f8dff;
+  --accent2:#7eb8ff;
+  --green:#00e5a0;
+  --yellow:#ffc542;
+  --orange:#ff8c42;
+  --red:#ff4f6b;
+  --purple:#b06aff;
+  --cyan:#00d4ff;
+  --text:#eef2ff;
+  --muted:#8b9abf;
+  --card:rgba(12,18,36,.9);
+  --glow-blue:rgba(79,141,255,.18);
+  --glow-purple:rgba(176,106,255,.18);
+}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── Animated Background ── */
+#bg-canvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;opacity:.5;
+}
+.content-wrap{position:relative;z-index:1;}
+
+/* ── Gradient Orbs ── */
+.orb{
+  position:fixed;border-radius:50%;filter:blur(120px);
+  pointer-events:none;z-index:0;animation:float 12s ease-in-out infinite;
+}
+.orb1{width:600px;height:600px;background:radial-gradient(circle,rgba(79,141,255,.15),transparent 70%);top:-200px;left:-150px;animation-delay:0s;}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(176,106,255,.12),transparent 70%);top:40%;right:-150px;animation-delay:-4s;}
+.orb3{width:400px;height:400px;background:radial-gradient(circle,rgba(0,212,255,.1),transparent 70%);bottom:-100px;left:30%;animation-delay:-8s;}
+@keyframes float{
+  0%,100%{transform:translateY(0) scale(1);}
+  50%{transform:translateY(-30px) scale(1.05);}
+}
+
+/* ── Grid overlay ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(79,141,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(79,141,255,.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── Navbar ── */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:68px;
+  background:rgba(6,9,18,.8);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:100;
+}
+.nav-brand{display:flex;align-items:center;gap:14px;}
+.nav-logo{
+  width:42px;height:42px;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  box-shadow:0 0 20px rgba(79,141,255,.4);
+  animation:logo-pulse 3s ease-in-out infinite;
+}
+@keyframes logo-pulse{
+  0%,100%{box-shadow:0 0 20px rgba(79,141,255,.4);}
+  50%{box-shadow:0 0 35px rgba(79,141,255,.7),0 0 60px rgba(176,106,255,.3);}
+}
+.nav-title{font-size:19px;font-weight:800;letter-spacing:.3px;}
+.nav-title span{
+  background:linear-gradient(135deg,var(--accent2),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.nav-badge{
+  background:rgba(79,141,255,.1);
+  border:1px solid rgba(79,141,255,.3);
+  color:var(--accent2);
+  font-size:11px;padding:5px 14px;border-radius:20px;font-weight:600;
+  letter-spacing:.4px;
+}
+.nav-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* ── Hero ── */
+.hero{padding:72px 48px 48px;max-width:1200px;margin:0 auto;}
+.hero-header{text-align:center;margin-bottom:56px;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(79,141,255,.08);border:1px solid rgba(79,141,255,.2);
+  color:var(--accent2);font-size:12px;font-weight:600;
+  padding:6px 18px;border-radius:20px;letter-spacing:.8px;text-transform:uppercase;
+  margin-bottom:22px;
+}
+.hero-header h1{
+  font-size:52px;font-weight:900;line-height:1.1;letter-spacing:-1px;
+}
+.hero-header h1 .grad{
+  background:linear-gradient(135deg,var(--accent2) 0%,var(--purple) 50%,var(--cyan) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-header p{
+  color:var(--muted);font-size:16px;margin-top:16px;
+  max-width:580px;margin-left:auto;margin-right:auto;line-height:1.7;
+}
+.hero-stats{
+  display:flex;justify-content:center;gap:40px;margin-top:32px;flex-wrap:wrap;
+}
+.hero-stat{text-align:center;}
+.hero-stat .val{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-stat .lbl{font-size:11px;color:var(--muted);font-weight:500;margin-top:2px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* ── Upload Card ── */
+.upload-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:24px;
+  backdrop-filter:blur(20px);
+  overflow:hidden;
+  box-shadow:0 0 60px rgba(79,141,255,.07),inset 0 1px 0 rgba(255,255,255,.05);
+  transition:border-color .3s,box-shadow .3s;
+}
+.upload-card:hover{
+  border-color:var(--border-glow);
+  box-shadow:0 0 80px rgba(79,141,255,.13),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.upload-zone{
+  padding:64px 40px;text-align:center;cursor:pointer;
+  position:relative;transition:.3s;
+}
+.upload-zone.drag-over{background:rgba(79,141,255,.06);}
+.upload-icon-wrap{
+  width:90px;height:90px;margin:0 auto 24px;
+  background:linear-gradient(135deg,rgba(79,141,255,.15),rgba(176,106,255,.15));
+  border:1px solid rgba(79,141,255,.25);
+  border-radius:24px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;
+  transition:.3s;
+  box-shadow:0 0 30px rgba(79,141,255,.15);
+}
+.upload-zone:hover .upload-icon-wrap{
+  transform:scale(1.05) translateY(-3px);
+  box-shadow:0 10px 40px rgba(79,141,255,.3);
+}
+.upload-zone h3{font-size:20px;font-weight:700;margin-bottom:8px;}
+.upload-zone p{color:var(--muted);font-size:14px;line-height:1.6;}
+.upload-formats{
+  display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap;
+}
+.fmt-tag{
+  background:rgba(79,141,255,.08);border:1px solid rgba(79,141,255,.15);
+  color:var(--muted);font-size:11px;font-weight:600;
+  padding:3px 10px;border-radius:6px;letter-spacing:.3px;
+}
+.upload-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:24px;padding:12px 32px;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  color:#fff;border-radius:12px;font-weight:700;font-size:14px;
+  cursor:pointer;transition:.3s;border:none;letter-spacing:.3px;
+  box-shadow:0 4px 24px rgba(79,141,255,.35);
+}
+.upload-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(79,141,255,.5);}
+#fileInput{display:none;}
+
+/* Preview */
+.preview-area{display:none;padding:0 40px 32px;text-align:center;}
+.preview-img-wrap{
+  position:relative;display:inline-block;
+  border-radius:16px;overflow:hidden;
+  border:2px solid var(--border-glow);
+  box-shadow:0 0 40px rgba(79,141,255,.2);
+}
+.preview-img{max-height:260px;display:block;}
+.preview-badge{
+  position:absolute;top:10px;right:10px;
+  background:rgba(0,229,160,.15);border:1px solid rgba(0,229,160,.3);
+  color:var(--green);font-size:11px;font-weight:700;
+  padding:4px 10px;border-radius:8px;backdrop-filter:blur(8px);
+}
+.preview-name{color:var(--muted);font-size:13px;margin-top:12px;}
+
+/* ── Analyze Button ── */
+.analyze-btn{
+  display:none;width:100%;margin-top:0;padding:18px;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--purple) 100%);
+  color:#fff;border:none;
+  font-size:16px;font-weight:800;
+  cursor:pointer;transition:.3s;letter-spacing:.5px;
+  position:relative;overflow:hidden;
+}
+.analyze-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
+  transform:translateX(-100%);transition:.6s;
+}
+.analyze-btn:hover::before{transform:translateX(100%);}
+.analyze-btn:hover{opacity:.92;}
+.analyze-btn:disabled{opacity:.45;cursor:not-allowed;}
+
+/* ── Pipeline Progress ── */
+.pipeline{display:none;margin-top:28px;}
+.pipeline-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.pipeline-header h3{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.stages{display:flex;flex-wrap:wrap;gap:8px;}
+.stage{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(22,30,54,.8);border:1px solid var(--border);
+  border-radius:10px;padding:9px 16px;font-size:12px;font-weight:500;
+  color:var(--muted);transition:.4s;backdrop-filter:blur(8px);
+}
+.stage.active{
+  border-color:var(--accent);
+  background:rgba(79,141,255,.12);color:var(--accent2);
+  box-shadow:0 0 16px rgba(79,141,255,.2);
+}
+.stage.done{
+  border-color:var(--green);
+  background:rgba(0,229,160,.08);color:var(--green);
+}
+.stage.error{border-color:var(--red);background:rgba(255,79,107,.08);color:var(--red);}
+.stage-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:.3s;}
+.stage.active .stage-dot{background:var(--accent);animation:pulse 1s infinite;}
+.stage.done .stage-dot{background:var(--green);}
+.stage.error .stage-dot{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(79,141,255,.4);}50%{opacity:.5;box-shadow:0 0 0 4px rgba(79,141,255,0);}}
+
+/* ── Results ── */
+#results{display:none;margin-top:48px;}
+
+/* Grade Card */
+.grade-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:40px;text-align:center;margin-bottom:24px;
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(20px);
+  box-shadow:0 0 60px rgba(79,141,255,.08);
+}
+.grade-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--purple),var(--cyan));
+}
+.grade-card-bg{
+  position:absolute;inset:0;opacity:.04;
+  background:radial-gradient(circle at 50% 50%,var(--accent),transparent 60%);
+  pointer-events:none;
+}
+.grade-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;}
+.grade-value{
+  font-size:40px;font-weight:900;margin-bottom:16px;
+  letter-spacing:-1px;
+  transition:color .4s;
+}
+.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 18px;border-radius:20px;font-size:12px;font-weight:700;
+  letter-spacing:.3px;
+}
+.badge-green{background:rgba(0,229,160,.12);color:var(--green);border:1px solid rgba(0,229,160,.25);}
+.badge-yellow{background:rgba(255,197,66,.12);color:var(--yellow);border:1px solid rgba(255,197,66,.25);}
+.badge-red{background:rgba(255,79,107,.12);color:var(--red);border:1px solid rgba(255,79,107,.25);}
+.badge-blue{background:rgba(79,141,255,.12);color:var(--accent2);border:1px solid rgba(79,141,255,.25);}
+.badge-purple{background:rgba(176,106,255,.12);color:var(--purple);border:1px solid rgba(176,106,255,.25);}
+.clinical-note{font-size:13px;color:var(--muted);line-height:1.6;max-width:600px;margin:0 auto;}
+
+/* Grid */
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:768px){.results-grid{grid-template-columns:1fr;}}
+
+/* Card */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;padding:24px;
+  backdrop-filter:blur(16px);
+  transition:border-color .3s,box-shadow .3s;
+}
+.card:hover{border-color:var(--border-glow);box-shadow:0 0 30px rgba(79,141,255,.08);}
+.card h4{
+  font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:20px;
+  display:flex;align-items:center;gap:8px;
+}
+.card h4::before{content:'';width:3px;height:14px;border-radius:2px;background:linear-gradient(135deg,var(--accent),var(--purple));}
+
+/* Model Table */
+.model-table{width:100%;border-collapse:collapse;}
+.model-table th{
+  text-align:left;padding:8px 0;
+  font-size:10px;color:var(--muted);font-weight:700;
+  text-transform:uppercase;letter-spacing:.8px;
+  border-bottom:1px solid var(--border);
+}
+.model-table td{padding:12px 0;font-size:13px;border-bottom:1px solid rgba(99,130,255,.06);}
+.model-table tr:last-child td{border-bottom:none;}
+.model-name{font-weight:700;color:var(--text);}
+.conf-bar{display:flex;align-items:center;gap:10px;}
+.bar{height:5px;border-radius:3px;background:rgba(99,130,255,.1);flex:1;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--purple));transition:width 1s ease;box-shadow:0 0 8px rgba(79,141,255,.4);}
+.conf-pct{font-size:12px;font-weight:700;color:var(--accent2);min-width:40px;text-align:right;}
+
+/* Prob bars */
+.prob-bars{display:flex;flex-direction:column;gap:7px;margin-top:12px;}
+.prob-row{display:flex;align-items:center;gap:10px;font-size:12px;}
+.prob-class{width:115px;color:var(--muted);white-space:nowrap;font-size:11px;}
+.prob-bar-wrap{flex:1;background:rgba(99,130,255,.08);border-radius:3px;height:7px;overflow:hidden;}
+.prob-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--purple));transition:width 1s ease;}
+.prob-pct{width:38px;text-align:right;font-weight:700;font-size:11px;color:var(--accent2);}
+
+/* Metric row */
+.metric-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:11px 0;border-bottom:1px solid rgba(99,130,255,.06);
+}
+.metric-row:last-child{border-bottom:none;}
+.metric-label{font-size:12px;color:var(--muted);}
+.metric-value{font-size:13px;font-weight:700;}
+
+/* Findings */
+.findings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.finding-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px;
+  background:rgba(99,130,255,.04);
+  border:1px solid var(--border);border-radius:12px;
+  transition:.3s;
+}
+.finding-item:hover{border-color:var(--border-glow);}
+.finding-icon{font-size:20px;}
+.finding-name{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+.finding-count{font-size:18px;font-weight:800;margin-top:1px;}
+
+/* Viz Tabs */
+.viz-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.tab-btn{
+  padding:8px 20px;border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(22,30,54,.6);
+  color:var(--muted);font-size:12px;font-weight:600;
+  cursor:pointer;transition:.25s;letter-spacing:.3px;
+}
+.tab-btn:hover{border-color:var(--border-glow);color:var(--text);}
+.tab-btn.active{
+  background:linear-gradient(135deg,rgba(79,141,255,.2),rgba(176,106,255,.2));
+  border-color:var(--accent);color:var(--accent2);
+  box-shadow:0 0 14px rgba(79,141,255,.2);
+}
+.tab-content{display:none;}
+.tab-content.active{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.viz-img{
+  width:100%;border-radius:14px;
+  border:1px solid var(--border);
+  box-shadow:0 0 30px rgba(79,141,255,.1);
+}
+.viz-caption{
+  font-size:11px;color:var(--muted);margin-top:10px;text-align:center;
+  letter-spacing:.3px;
+}
+
+/* Review Alert */
+.review-alert{
+  background:rgba(255,79,107,.07);
+  border:1px solid rgba(255,79,107,.25);
+  border-radius:16px;padding:22px 26px;margin-bottom:16px;
+  backdrop-filter:blur(12px);
+}
+.review-alert h4{
+  color:var(--red);font-size:14px;font-weight:800;
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.review-alert ul{padding-left:18px;color:var(--muted);font-size:13px;}
+.review-alert ul li{margin:5px 0;line-height:1.5;}
+
+/* 4-2-1 Rule */
+.rule-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.quad-box{
+  background:rgba(99,130,255,.05);border:1px solid var(--border);
+  border-radius:12px;padding:14px;text-align:center;transition:.3s;
+}
+.quad-label{font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.3px;text-transform:uppercase;}
+.quad-val{font-size:22px;font-weight:800;}
+.quad-warn{border-color:rgba(255,79,107,.4)!important;background:rgba(255,79,107,.08)!important;}
+
+/* Action buttons */
+.report-btn{
+  width:100%;padding:16px;margin-top:20px;
+  background:rgba(79,141,255,.08);
+  border:1px solid rgba(79,141,255,.3);
+  border-radius:14px;
+  color:var(--accent2);font-size:14px;font-weight:700;
+  cursor:pointer;transition:.3s;letter-spacing:.3px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.report-btn:hover{background:rgba(79,141,255,.15);box-shadow:0 0 24px rgba(79,141,255,.2);}
+.new-scan-btn{
+  width:100%;padding:12px;margin-top:10px;
+  background:transparent;border:1px solid var(--border);border-radius:14px;
+  color:var(--muted);font-size:13px;cursor:pointer;transition:.3s;
+}
+.new-scan-btn:hover{border-color:var(--border-glow);color:var(--text);}
+
+/* Error */
+.error-msg{
+  background:rgba(255,79,107,.08);border:1px solid rgba(255,79,107,.25);
+  border-radius:12px;padding:16px 20px;color:var(--red);
+  font-size:13px;margin-top:16px;display:none;
+}
+
+/* Disclaimer */
+.disclaimer{
+  background:rgba(79,141,255,.04);border:1px solid rgba(79,141,255,.12);
+  border-radius:12px;padding:14px 20px;
+  font-size:12px;color:var(--muted);margin-top:16px;text-align:center;line-height:1.6;
+}
+
+/* Spinner */
+.spinner{
+  display:inline-block;width:15px;height:15px;
+  border:2px solid rgba(255,255,255,.2);border-top-color:#fff;
+  border-radius:50%;animation:spin .55s linear infinite;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Animated counter */
+.count-up{display:inline-block;}
+
+/* Scroll */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:rgba(99,130,255,.25);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(99,130,255,.45);}
+
+/* Separator */
+.section-sep{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:4px 0 20px;}
+</style>
+</head>
+<body>
+
+<!-- Animated particle canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Gradient orbs -->
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="content-wrap">
+
+<!-- Navbar -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">👁</div>
+    <div>
+      <div class="nav-title">DRishti <span>AI</span></div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-dot"></div>
+    <span class="nav-badge">AI-Assisted Screening System</span>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="hero">
+
+  <!-- Hero Header -->
+  <div class="hero-header">
+    <div class="hero-eyebrow">🔬 Smart Ophthalmology</div>
+    <h1>Diabetic Retinopathy<br><span class="grad">Screening System</span></h1>
+    <p>Upload a retinal fundus photograph for multi-stage AI analysis using ResNet-50, EfficientNet-B4, MC Dropout uncertainty estimation, and the Evidence-Consistency Decision Engine.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="val">25×</div><div class="lbl">MC Dropout Runs</div></div>
+      <div class="hero-stat"><div class="val">2</div><div class="lbl">Deep Learning Models</div></div>
+      <div class="hero-stat"><div class="val">10</div><div class="lbl">Pipeline Stages</div></div>
+      <div class="hero-stat"><div class="val">4-2-1</div><div class="lbl">Clinical Evidence Rule</div></div>
+    </div>
+  </div>
+
+  <!-- Upload Card -->
+  <div class="upload-card">
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon-wrap">🖼️</div>
+      <h3>Drop your retinal image here</h3>
+      <p>Drag & drop or click to browse<br>Supports JPG, PNG, BMP, TIFF &nbsp;·&nbsp; Min. 256×256 px</p>
+      <div class="upload-formats">
+        <span class="fmt-tag">JPG</span><span class="fmt-tag">PNG</span>
+        <span class="fmt-tag">BMP</span><span class="fmt-tag">TIFF</span>
+      </div>
+      <label class="upload-btn" for="fileInput">📁 &nbsp;Browse File</label>
+      <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.bmp,.tiff,.tif">
+    </div>
+
+    <div class="preview-area" id="previewArea">
+      <div class="preview-img-wrap">
+        <img class="preview-img" id="previewImg" src="" alt="Preview">
+        <div class="preview-badge">✓ Ready</div>
+      </div>
+      <p class="preview-name" id="previewName"></p>
+    </div>
+
+    <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+      🔬 &nbsp;Analyze Retinal Image
+    </button>
+  </div>
+
+  <!-- Error -->
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- Pipeline -->
+  <div class="pipeline" id="pipeline">
+    <div class="pipeline-header">
+      <h3>Pipeline Status</h3>
+    </div>
+    <div class="stages">
+      <div class="stage" id="s1"><span class="stage-dot"></span>Image Quality</div>
+      <div class="stage" id="s2"><span class="stage-dot"></span>Anatomy</div>
+      <div class="stage" id="s3"><span class="stage-dot"></span>Lesion Detection</div>
+      <div class="stage" id="s4"><span class="stage-dot"></span>Neovascularization</div>
+      <div class="stage" id="s5"><span class="stage-dot"></span>ResNet-50</div>
+      <div class="stage" id="s6"><span class="stage-dot"></span>EfficientNet-B4</div>
+      <div class="stage" id="s7"><span class="stage-dot"></span>MC Dropout</div>
+      <div class="stage" id="s8"><span class="stage-dot"></span>ECDE</div>
+      <div class="stage" id="s9"><span class="stage-dot"></span>Grad-CAM</div>
+      <div class="stage" id="s10"><span class="stage-dot"></span>Report Ready</div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+
+    <!-- Review Alert -->
+    <div class="review-alert" id="reviewAlert" style="display:none;">
+      <h4>⚠️ Human Review Recommended</h4>
+      <ul id="reviewReasonsList"></ul>
+    </div>
+
+    <!-- Grade Card -->
+    <div class="grade-card">
+      <div class="grade-card-bg"></div>
+      <div class="grade-label">DR Grade — Final ECDE Decision</div>
+      <div class="grade-value" id="gradeValue">—</div>
+      <div class="badges" id="gradeBadges"></div>
+      <p class="clinical-note" id="clinicalNote"></p>
+    </div>
+
+    <!-- Model Predictions + Reliability -->
+    <div class="results-grid">
+      <div class="card">
+        <h4>Model Predictions</h4>
+        <table class="model-table">
+          <tr><th>Model</th><th>Grade</th><th>Confidence</th><th>σ</th></tr>
+          <tr>
+            <td><span class="model-name">ResNet-50</span></td>
+            <td id="rnLabel">—</td>
+            <td>
+              <div class="conf-bar">
+                <div class="bar"><div class="bar-fill" id="rnBar" style="width:0%"></div></div>
+                <span class="conf-pct" id="rnConf">—</span>
+              </div>
+            </td>
+            <td id="rnUnc" style="font-size:12px;color:var(--muted);">—</td>
+          </tr>
+          <tr>
+            <td><span class="model-name">EfficientNet-B4</span></td>
+            <td id="enLabel">—</td>
+            <td>
+              <div class="conf-bar">
+                <div class="bar"><div class="bar-fill" id="enBar" style="width:0%"></div></div>
+                <span class="conf-pct" id="enConf">—</span>
+              </div>
+            </td>
+            <td id="enUnc" style="font-size:12px;color:var(--muted);">—</td>
+          </tr>
+        </table>
+        <div class="section-sep" style="margin-top:16px;"></div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;font-weight:700;">Ensemble Probability Distribution</div>
+        <div class="prob-bars" id="probBars"></div>
+      </div>
+
+      <div class="card">
+        <h4>Reliability (ECDE)</h4>
+        <div class="metric-row"><span class="metric-label">Model Agreement</span><span class="metric-value" id="modelAgreement">—</span></div>
+        <div class="metric-row"><span class="metric-label">Jensen-Shannon Divergence</span><span class="metric-value" id="jsdValue">—</span></div>
+        <div class="metric-row"><span class="metric-label">ResNet-50 Uncertainty (σ)</span><span class="metric-value" id="rnUncMetric">—</span></div>
+        <div class="metric-row"><span class="metric-label">EfficientNet Uncertainty (σ)</span><span class="metric-value" id="enUncMetric">—</span></div>
+        <div class="metric-row"><span class="metric-label">Evidence Grade (Lesions)</span><span class="metric-value" id="evidenceGrade">—</span></div>
+        <div class="metric-row"><span class="metric-label">Evidence Mismatch</span><span class="metric-value" id="evidenceMismatch">—</span></div>
+        <div class="metric-row"><span class="metric-label">IQA Score</span><span class="metric-value" id="iqaScore">—</span></div>
+      </div>
+    </div>
+
+    <!-- Lesion Findings + NV -->
+    <div class="results-grid">
+      <div class="card">
+        <h4>Detected Lesions</h4>
+        <div class="findings-grid" id="findingsGrid"></div>
+      </div>
+      <div class="card">
+        <h4>Neovascularization</h4>
+        <div class="metric-row"><span class="metric-label">NV Detected</span><span class="metric-value" id="nvDetected">—</span></div>
+        <div class="metric-row"><span class="metric-label">NV Probability</span><span class="metric-value" id="nvProb">—</span></div>
+        <div class="metric-row"><span class="metric-label">NVE Score</span><span class="metric-value" id="nveScore">—</span></div>
+        <div class="metric-row"><span class="metric-label">NVD Score</span><span class="metric-value" id="nvdScore">—</span></div>
+        <div class="metric-row"><span class="metric-label">Vessel Tortuosity</span><span class="metric-value" id="tortuosity">—</span></div>
+        <div class="metric-row"><span class="metric-label">Vessel Density</span><span class="metric-value" id="vesselDensity">—</span></div>
+      </div>
+    </div>
+
+    <!-- 4-2-1 Rule -->
+    <div class="card" style="margin-bottom:16px;">
+      <h4>4-2-1 Clinical Evidence Rule (Severe NPDR)</h4>
+      <div class="rule-grid" id="quadrantGrid"></div>
+      <div style="margin-top:14px;">
+        <div class="metric-row"><span class="metric-label">Venous Beading Proxy</span><span class="metric-value" id="venousBeading">—</span></div>
+        <div class="metric-row"><span class="metric-label">IRMA Proxy</span><span class="metric-value" id="irmaProxy">—</span></div>
+        <div class="metric-row"><span class="metric-label">Rule Triggered</span><span class="metric-value" id="ruleTrigger">—</span></div>
+      </div>
+    </div>
+
+    <!-- Anatomical Findings -->
+    <div class="card" style="margin-bottom:16px;">
+      <h4>Anatomical Findings</h4>
+      <div class="metric-row"><span class="metric-label">Optic Disc Detected</span><span class="metric-value" id="odDetected">—</span></div>
+      <div class="metric-row"><span class="metric-label">Fovea Estimated</span><span class="metric-value" id="foveaEst">—</span></div>
+      <div class="metric-row"><span class="metric-label">Vessel Density</span><span class="metric-value" id="vesselDensityAnat">—</span></div>
+    </div>
+
+    <!-- Visualizations -->
+    <div class="card" style="margin-bottom:16px;">
+      <h4>Visualizations</h4>
+      <div class="viz-tabs">
+        <button class="tab-btn active" onclick="showTab('original',this)">🖼 Original</button>
+        <button class="tab-btn" onclick="showTab('anatomy',this)">🫀 Anatomy</button>
+        <button class="tab-btn" onclick="showTab('lesions',this)">🔬 Lesions</button>
+        <button class="tab-btn" onclick="showTab('gradcam',this)">🌡 Grad-CAM</button>
+      </div>
+      <div class="tab-content active" id="tab-original">
+        <img class="viz-img" id="vizOriginal" src="" alt="Original">
+        <p class="viz-caption">Uploaded retinal fundus photograph</p>
+      </div>
+      <div class="tab-content" id="tab-anatomy">
+        <img class="viz-img" id="vizAnatomy" src="" alt="Anatomy">
+        <p class="viz-caption">Anatomy segmentation — Optic Disc (cyan) · Blood Vessels (green) · Fovea (magenta)</p>
+      </div>
+      <div class="tab-content" id="tab-lesions">
+        <img class="viz-img" id="vizLesions" src="" alt="Lesions">
+        <p class="viz-caption">Lesion overlay — Microaneurysms (red) · Hemorrhages (dark red) · Hard Exudates (yellow) · Soft Exudates (white)</p>
+      </div>
+      <div class="tab-content" id="tab-gradcam">
+        <img class="viz-img" id="vizGradcam" src="" alt="Grad-CAM">
+        <p class="viz-caption">Grad-CAM attention heatmap — regions influencing the ResNet-50 grading decision</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <button class="report-btn" onclick="openReport()">📄 &nbsp;Generate Full Clinical Report</button>
+    <button class="new-scan-btn" onclick="resetUI()">↩ &nbsp;New Scan</button>
+
+    <div class="disclaimer">
+      ⚠ DRishti AI is an <strong>AI-assisted decision-support system</strong>.
+      All clinical decisions must be confirmed by a qualified ophthalmologist. Not for standalone clinical use.
+    </div>
+
+  </div><!-- /results -->
+</div><!-- /hero -->
+</div><!-- /content-wrap -->
+
+<script>
+/* ── Particle Canvas ── */
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles=[], animFrame;
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for(let i=0;i<70;i++) particles.push({
+    x: Math.random()*1920,
+    y: Math.random()*1080,
+    r: Math.random()*1.5+.3,
+    vx:(Math.random()-.5)*.25,
+    vy:(Math.random()-.5)*.25,
+    a: Math.random()*.5+.1,
+  });
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Connections
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x;
+        const dy=particles[i].y-particles[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<160){
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x,particles[i].y);
+          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle=`rgba(79,141,255,${.07*(1-d/160)})`;
+          ctx.lineWidth=.5;
+          ctx.stroke();
+        }
+      }
+    }
+    // Dots
+    particles.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(99,141,255,${p.a})`;
+      ctx.fill();
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+    });
+    animFrame = requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ── Constants ── */
+const DR_CLASSES = ["No DR","Mild NPDR","Moderate NPDR","Severe NPDR","Proliferative DR"];
+const GRADE_COLORS = {
+  "No DR":            "#00e5a0",
+  "Mild NPDR":        "#ffc542",
+  "Moderate NPDR":    "#ff8c42",
+  "Severe NPDR":      "#ff4f6b",
+  "Proliferative DR": "#b06aff",
+  "Image Not Gradable":"#8b9abf",
+};
+
+let uploadedFile = null;
+
+/* ── File handling ── */
+const zone  = document.getElementById('uploadZone');
+const input = document.getElementById('fileInput');
+
+zone.addEventListener('dragover', e=>{e.preventDefault();zone.classList.add('drag-over');});
+zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e=>{
+  e.preventDefault();zone.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(f) handleFile(f);
+});
+zone.addEventListener('click', e => {
+  if (e.target !== input && e.target.tagName !== 'LABEL') {
+    input.click();
+  }
+});
+input.addEventListener('change', () => { if (input.files && input.files[0]) handleFile(input.files[0]); });
+
+function handleFile(f){
+  uploadedFile=f;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('previewImg').src=e.target.result;
+    document.getElementById('previewName').textContent=f.name+' ('+( f.size/1024).toFixed(1)+' KB)';
+    document.getElementById('previewArea').style.display='block';
+    document.getElementById('analyzeBtn').style.display='block';
+    document.getElementById('results').style.display='none';
+    document.getElementById('errorMsg').style.display='none';
+  };
+  reader.readAsDataURL(f);
+}
+
+/* ── Analysis ── */
+async function runAnalysis(){
+  if(!uploadedFile) return;
+  const btn=document.getElementById('analyzeBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> &nbsp;Analyzing…';
+  document.getElementById('pipeline').style.display='block';
+  document.getElementById('results').style.display='none';
+  document.getElementById('errorMsg').style.display='none';
+  resetStages();
+
+  const stageIds=['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10'];
+  const timer=animateStages(stageIds);
+
+  try{
+    const fd=new FormData();
+    fd.append('file',uploadedFile);
+    const res=await fetch('/analyze',{method:'POST',body:fd});
+    if(!res.ok){const e=await res.json();throw new Error(e.detail||'Analysis failed');}
+    const data=await res.json();
+    clearTimeout(timer);
+    markAllDone(stageIds);
+    await sleep(400);
+    renderResults(data);
+  }catch(e){
+    clearTimeout(timer);
+    markError(stageIds);
+    showError(e.message);
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='🔬 &nbsp;Analyze Retinal Image';
+  }
+}
+
+/* ── Stage animation ── */
+function resetStages(){
+  for(let i=1;i<=10;i++){
+    const s=document.getElementById('s'+i);
+    s.classList.remove('active','done','error');
+  }
+}
+function animateStages(ids){
+  let i=0;
+  function next(){
+    if(i>0) document.getElementById(ids[i-1])?.classList.add('done');
+    if(i<ids.length){
+      document.getElementById(ids[i]).classList.add('active');
+      i++;
+      return setTimeout(next,600);
+    }
+  }
+  next();
+}
+function markAllDone(ids){ids.forEach(id=>{const s=document.getElementById(id);s.classList.remove('active','error');s.classList.add('done');});}
+function markError(ids){ids.forEach(id=>{const s=document.getElementById(id);if(!s.classList.contains('done')){s.classList.remove('active');s.classList.add('error');}});}
+
+/* ── Render Results ── */
+function renderResults(d){
+  document.getElementById('results').style.display='block';
+  const ecde=d.ecde||{}, grading=d.grading||{}, lesion=d.lesion||{};
+  const nv=d.neovascularization||{}, anatomy=d.anatomy||{}, iqa=d.iqa||{}, gradcam=d.gradcam||{};
+
+  // Grade
+  const grade=ecde.final_grade||'—';
+  const gradeEl=document.getElementById('gradeValue');
+  gradeEl.textContent=grade;
+  gradeEl.style.color=GRADE_COLORS[grade]||'#eef2ff';
+
+  // Badges
+  const badgeDiv=document.getElementById('gradeBadges');
+  const decision=ecde.decision==='HUMAN_REVIEW';
+  const confLvl=ecde.confidence_level||'';
+  badgeDiv.innerHTML=
+    makeBadge(decision?'⚠ Human Review Recommended':'✓ Automated Grade', decision?'red':'green')+
+    makeBadge(confLvl+' Confidence', confLvl==='High'?'green':confLvl==='Moderate'?'yellow':'red');
+  document.getElementById('clinicalNote').textContent=ecde.clinical_note||'';
+
+  // Review alert
+  const reasons=ecde.review_reasons||[];
+  if(reasons.length){
+    document.getElementById('reviewAlert').style.display='block';
+    document.getElementById('reviewReasonsList').innerHTML=reasons.map(r=>`<li>${r}</li>`).join('');
+  } else document.getElementById('reviewAlert').style.display='none';
+
+  // Models
+  const rn=grading.resnet50||{}, en=grading.efficientnet||{};
+  document.getElementById('rnLabel').textContent=rn.pred_label||'—';
+  document.getElementById('enLabel').textContent=en.pred_label||'—';
+  document.getElementById('rnConf').textContent=pct(rn.confidence);
+  document.getElementById('enConf').textContent=pct(en.confidence);
+  document.getElementById('rnBar').style.width=pct(rn.confidence);
+  document.getElementById('enBar').style.width=pct(en.confidence);
+  document.getElementById('rnUnc').textContent=(rn.uncertainty||0).toFixed(4);
+  document.getElementById('enUnc').textContent=(en.uncertainty||0).toFixed(4);
+
+  // Prob bars
+  const ensProbs=grading.ensemble_probs||Array(5).fill(0);
+  document.getElementById('probBars').innerHTML=DR_CLASSES.map((cls,i)=>
+    `<div class="prob-row">
+       <span class="prob-class">${cls}</span>
+       <div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:${(ensProbs[i]*100).toFixed(1)}%"></div></div>
+       <span class="prob-pct">${(ensProbs[i]*100).toFixed(1)}%</span>
+     </div>`).join('');
+
+  // Reliability
+  document.getElementById('modelAgreement').textContent=ecde.model_agreement||'—';
+  document.getElementById('jsdValue').textContent=(ecde.jsd!=null)?ecde.jsd.toFixed(4):'—';
+  document.getElementById('rnUncMetric').textContent=(ecde.resnet_uncertainty!=null)?ecde.resnet_uncertainty.toFixed(4):'—';
+  document.getElementById('enUncMetric').textContent=(ecde.effnet_uncertainty!=null)?ecde.effnet_uncertainty.toFixed(4):'—';
+  document.getElementById('evidenceGrade').textContent=ecde.evidence_grade_label||'—';
+  document.getElementById('evidenceMismatch').textContent=ecde.evidence_mismatch?'⚠ Yes':'✓ No';
+  document.getElementById('iqaScore').textContent=pct(iqa.confidence);
+
+  // Lesions
+  const counts=lesion.counts||{}, findings=lesion.findings||{};
+  const lesionDefs=[
+    {key:'microaneurysms',icon:'🔴',label:'Microaneurysms'},
+    {key:'hemorrhages',   icon:'🩸',label:'Hemorrhages'},
+    {key:'hard_exudates', icon:'🟡',label:'Hard Exudates'},
+    {key:'soft_exudates', icon:'⬜',label:'Soft Exudates'},
+  ];
+  document.getElementById('findingsGrid').innerHTML=lesionDefs.map(l=>
+    `<div class="finding-item">
+       <span class="finding-icon">${l.icon}</span>
+       <div>
+         <div class="finding-name">${l.label}</div>
+         <div class="finding-count" style="color:${(counts[l.key]||0)>0?'var(--red)':'var(--green)'}">${counts[l.key]||0}</div>
+       </div>
+     </div>`).join('');
+
+  // NV
+  const nvDet=nv.neovascularization_detected;
+  document.getElementById('nvDetected').innerHTML=nvDet?'<span style="color:var(--red)">⚠ Yes</span>':'<span style="color:var(--green)">✓ No</span>';
+  document.getElementById('nvProb').textContent=pct(nv.nv_probability);
+  document.getElementById('nveScore').textContent=(nv.nve_score||0).toFixed(4);
+  document.getElementById('nvdScore').textContent=(nv.nvd_score||0).toFixed(4);
+  document.getElementById('tortuosity').textContent=(nv.tortuosity||0).toFixed(2);
+  document.getElementById('vesselDensity').textContent=(nv.vessel_density||0).toFixed(1)+'%';
+
+  // 4-2-1
+  const rule=ecde.rule_421||{};
+  const quads=rule.quadrant_hemorrhages||[0,0,0,0];
+  const quadLabels=['Top-Left','Top-Right','Bot-Left','Bot-Right'];
+  document.getElementById('quadrantGrid').innerHTML=quads.map((q,i)=>
+    `<div class="quad-box ${q>20?'quad-warn':''}">
+       <div class="quad-label">${quadLabels[i]}</div>
+       <div class="quad-val" style="color:${q>20?'var(--red)':'var(--text)'}">${q}</div>
+     </div>`).join('');
+  document.getElementById('venousBeading').textContent=rule.venous_beading_proxy?'⚠ Yes':'✓ No';
+  document.getElementById('irmaProxy').textContent=rule.irma_proxy?'⚠ Yes':'✓ No';
+  document.getElementById('ruleTrigger').textContent=rule.rule_triggered||'Not triggered';
+
+  // Anatomy
+  const anatF=anatomy.findings||{};
+  document.getElementById('odDetected').textContent=anatF.optic_disc_detected?'✓ Yes':'— Not Detected';
+  document.getElementById('foveaEst').textContent=anatF.fovea_estimated?'✓ Yes':'—';
+  document.getElementById('vesselDensityAnat').textContent=(anatF.vessel_density_percent||0).toFixed(1)+'%';
+
+  // Viz
+  document.getElementById('vizOriginal').src='data:image/png;base64,'+(d.original_b64||'');
+  document.getElementById('vizAnatomy').src='data:image/png;base64,'+(anatomy.overlay_b64||'');
+  document.getElementById('vizLesions').src='data:image/png;base64,'+(lesion.overlay_b64||'');
+  document.getElementById('vizGradcam').src=gradcam.overlay_b64?'data:image/png;base64,'+gradcam.overlay_b64:'';
+
+  window._lastFile=uploadedFile;
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}
+
+/* ── Report ── */
+function openReport(){
+  if(!window._lastFile) return;
+  const fd=new FormData();fd.append('file',window._lastFile);
+  fetch('/report',{method:'POST',body:fd})
+    .then(r=>r.text())
+    .then(html=>{const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),800);})
+    .catch(e=>showError('Report generation failed: '+e.message));
+}
+
+/* ── Tabs ── */
+function showTab(name,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── Reset ── */
+function resetUI(){
+  uploadedFile=null;
+  document.getElementById('previewArea').style.display='none';
+  document.getElementById('previewImg').src='';
+  document.getElementById('analyzeBtn').style.display='none';
+  document.getElementById('pipeline').style.display='none';
+  document.getElementById('results').style.display='none';
+  document.getElementById('errorMsg').style.display='none';
+  document.getElementById('fileInput').value='';
+  resetStages();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── Helpers ── */
+function makeBadge(text,color){return `<span class="badge badge-${color}">${text}</span>`;}
+function pct(v){return v!=null?(v*100).toFixed(1)+'%':'—';}
+function showError(msg){const el=document.getElementById('errorMsg');el.textContent='❌ '+msg;el.style.display='block';}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+</script>
+</body>
+</html>
